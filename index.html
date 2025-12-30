@@ -6,22 +6,20 @@
   <title>Bethel Live Banner</title>
 
   <style>
-      :root{
-      /* Adjust these if you want to fine-tune header height */
+    :root {
       --header-height-desktop: 56px;
       --header-height-mobile: 64px;
-
       --live-bg: #E41C23;
       --offline-bg: #111111;
       --text: #ffffff;
-  }
-  
-  html, body {
+    }
+
+    html, body {
       margin: 0;
       padding: 0;
       background: transparent;
       overflow: hidden;
-  }
+    }
 
     .banner {
       position: fixed;
@@ -29,15 +27,15 @@
       left: 0;
       width: 100%;
       height: var(--header-height-desktop);
-      box-sizing: border-box;
       padding: 10px 14px;
+      box-sizing: border-box;
       display: none;
       z-index: 9999;
       color: var(--text);
       font-family: Arial, sans-serif;
     }
 
- .bannerInner {
+    .bannerInner {
       height: 100%;
       display: flex;
       align-items: center;
@@ -51,32 +49,28 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
       line-height: 1.1;
     }
 
-     .titleRow {
+    .titleRow {
       font-weight: 800;
       font-size: 16px;
       letter-spacing: 0.2px;
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 6px;
     }
 
     .subRow {
       margin-top: 2px;
-      font-weight: 600;
       font-size: 12px;
+      font-weight: 600;
       opacity: 0.92;
     }
 
     .live { background: var(--live-bg); }
-    .offline { background: var(--offline-bg); 
-    }
+    .offline { background: var(--offline-bg); }
 
-     /* Spacer so page content is not covered */
     #spacer {
       display: none;
       height: var(--header-height-desktop);
@@ -88,40 +82,24 @@
       height: 8px;
       border-radius: 50%;
       background: #ffffff;
-      box-shadow: 0 0 0 rgba(255,255,255,0.7);
       animation: pulse 1.5s infinite;
-      display: inline-block;
     }
 
-       @keyframes pulse {
+    @keyframes pulse {
       0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.7); }
       70%  { box-shadow: 0 0 0 8px rgba(255,255,255,0); }
       100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
     }
 
-    /* 📱 Mobile adjustments */
-    @media (max-width: 520px){
-      .banner {
-        height: var(--header-height-mobile);
-        padding: 10px;
-      }
-      #spacer {
-        height: var(--header-height-mobile);
-      }
-      .titleRow {
-        font-size: 15px;
-        flex-wrap: wrap;
-      }
-      .subRow {
-        font-size: 12px;
-      }
+    @media (max-width: 520px) {
+      .banner { height: var(--header-height-mobile); }
+      #spacer { height: var(--header-height-mobile); }
     }
   </style>
 </head>
-  
+
 <body>
 
- 
   <div id="banner" class="banner">
     <div class="bannerInner">
       <a id="link" class="bannerLink" href="#" target="_blank" rel="noopener">
@@ -136,34 +114,33 @@
   <script>
     (function () {
 
-      const API_KEY     = "AIzaSyAydGEq9gQCC8QEKRS7gUK6QODYPaMveI4";
-      const CHANNEL_ID  = "UCvFyu7ybvACGGblAZxuE93g";
+      const API_KEY    = "AIzaSyAUjf8QLzCafhgxSI8LN7e116-VZgcw4kg";
+      const CHANNEL_ID = "UCvFyu7ybvACGGblAZxuE93g";
 
-       /* Destination pages */
       const WATCH_LIVE_PAGE = "https://bethelamelancaster.com/watch-live";
       const REPLAY_PAGE     = "https://bethelamelancaster.com/watch-live#replay";
-      
+
       const banner = document.getElementById("banner");
       const spacer = document.getElementById("spacer");
-      const link   = document.getElementById("Link");
+      const link   = document.getElementById("link");
       const title  = document.getElementById("title");
       const sub    = document.getElementById("sub");
 
-       function showCommon() {
+      function showCommon() {
         banner.style.display = "block";
         spacer.style.display = "block";
       }
 
       function showLive() {
         banner.className = "banner live";
-         title.innerHTML = '<span class="liveDot"></span>Watch Live Now';
+        title.innerHTML = '<span class="liveDot"></span>Watch Live Now';
         sub.textContent = "Join us Sundays at 9:30 AM";
         link.href = WATCH_LIVE_PAGE;
         showCommon();
       }
 
       function showOffline() {
-       banner.className = "banner offline";
+        banner.className = "banner offline";
         title.textContent = "▶ Watch Last Service";
         sub.textContent = "Join us Sundays at 9:30 AM";
         link.href = REPLAY_PAGE;
@@ -175,31 +152,25 @@
           const url =
             "https://www.googleapis.com/youtube/v3/search" +
             "?part=snippet" +
-            "&channelId=" + encodeURIComponent(CHANNEL_ID) +
-            "&eventType=live" +
-            "&type=video" +
-            "&maxResults=1" +
-            "&key=" + encodeURIComponent(API_KEY);
+            "&channelId=" + CHANNEL_ID +
+            "&eventType=live&type=video&maxResults=1" +
+            "&key=" + API_KEY;
 
           const res = await fetch(url, { cache: "no-store" });
-          if (!res.ok) throw new Error("YT API " + res.status);
-
           const data = await res.json();
-          const item = data.items && data.items[0];
 
-          if (item && item.id && item.id.videoId) {
+          if (data.items && data.items.length) {
             showLive();
           } else {
             showOffline();
           }
-        } catch (e) {
-          // If API fails, fail gracefully to offline state
+        } catch {
           showOffline();
         }
       }
 
       checkLive();
-      setInterval(checkLive, 60000); // re-check every minute
+      setInterval(checkLive, 60000);
 
     })();
   </script>

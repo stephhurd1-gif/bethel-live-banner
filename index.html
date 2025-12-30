@@ -23,6 +23,20 @@
       overflow: hidden;
   }
 
+    .banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: var(--header-height-desktop);
+      box-sizing: border-box;
+      padding: 10px 14px;
+      display: none;
+      z-index: 9999;
+      color: var(--text);
+      font-family: Arial, sans-serif;
+    }
+
  .bannerInner {
       height: 100%;
       display: flex;
@@ -104,6 +118,7 @@
     }
   </style>
 </head>
+  
 <body>
 
  
@@ -123,8 +138,11 @@
 
       const API_KEY     = "AIzaSyAydGEq9gQCC8QEKRS7gUK6QODYPaMveI4";
       const CHANNEL_ID  = "UCvFyu7ybvACGGblAZxuE93g";
-      const PLAYLIST_ID = "PLREUaQOGIVDZ29eYTc6EGN7gXwgBWioHq";
 
+       /* Destination pages */
+      const WATCH_LIVE_PAGE = "https://bethelamelancaster.com/watch-live";
+      const REPLAY_PAGE     = "https://bethelamelancaster.com/watch-live#replay";
+      
       const banner = document.getElementById("banner");
       const spacer = document.getElementById("spacer");
       const link   = document.getElementById("Link");
@@ -145,10 +163,8 @@
       }
 
       function showOffline() {
-        banner.className = "banner offline";
-        link.textContent = "▶ Watch Last Service";
-        link.href = "https://www.bethelamelancaster.com/watch-live#replay";
-        banner.style.display = "block";
+       banner.className = "banner offline";
+        title.textContent = "▶ Watch Last Service";
         sub.textContent = "Join us Sundays at 9:30 AM";
         link.href = REPLAY_PAGE;
         showCommon();
@@ -172,7 +188,7 @@
           const item = data.items && data.items[0];
 
           if (item && item.id && item.id.videoId) {
-            showLive(item.id.videoId);
+            showLive();
           } else {
             showOffline();
           }

@@ -6,12 +6,17 @@
   <title>Bethel Live Banner</title>
 
   <style>
-    :root {
-      --header-height-desktop: 140px;
-      --header-height-mobile: 160px;
-      --live-bg: #E41C23;
-      --offline-bg: #111111;
-      --text: #ffffff;
+    :root{
+      /* Height (match your GoDaddy iframe height) */
+      --h-desktop: 84px;
+      --h-mobile: 96px;
+
+  /* OFFICIAL BETHEL AME COLORS */
+  --black: #01060b;
+  --gold: #f7bf5b;
+  --purple: #86239c;
+  --green: #429e40;
+  --white: #fffefe;
     }
 
     html, body {
@@ -19,83 +24,206 @@
       padding: 0;
       background: transparent;
       overflow: hidden;
+      font-family: Arial, sans-serif;
     }
 
+    /* Banner shell */
     .banner {
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       width: 100%;
-      height: var(--header-height-desktop);
-      padding: 10px 14px;
+      height: var(--h-desktop);
       box-sizing: border-box;
+      padding: 10px 14px;
       display: none;
       z-index: 9999;
-      color: var(--text);
-      font-family: Arial, sans-serif;
+      color: var(--white);
+
+      /* Gentle slide-down on show */
+      transform: translateY(-16px);
+      opacity: 0;
+      transition: transform 520ms ease, opacity 520ms ease;
+
+      /* Depth */
+      box-shadow: 0 10px 22px rgba(0,0,0,0.35);
+    }
+
+    .banner.is-visible {
+      transform: translateY(0);
+      opacity: 1;
     }
 
     .bannerInner {
       height: 100%;
-      padding-top: 10px;
-  padding-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
     }
 
     a.bannerLink {
-      color: var(--text);
+      color: var(--white);
       text-decoration: none;
+      width: 100%;
+      max-width: 1100px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      line-height: 1.1;
+      justify-content: center;
+      gap: 4px;
+      line-height: 1.12;
+      border-radius: 999px;
+      padding: 10px 18px;
+      box-sizing: border-box;
     }
 
+    /* Title / subtext */
     .titleRow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
       font-weight: 900;
-      font-size: 26px;
+      letter-spacing: 0.2px;
+      font-size: 22px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.25);
     }
 
     .subRow {
-      font-size: 16px;
+      font-size: 14px;
+      font-weight: 700;
+      opacity: 0.95;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.20);
     }
 
-    .live { background: var(--live-bg); }
-    .offline { background: var(--offline-bg); }
+    /* LIVE badge */
+   .liveBadge {
+  background: linear-gradient(
+    180deg,
+    #fff1c9,
+    var(--gold)
+  );
+  color: #2b1b05;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 12px;
+  border-radius: 999px;
+  letter-spacing: 0.9px;
+  box-shadow:
+    0 6px 16px rgba(1,6,11,0.35);
+  position: relative;
+  overflow: hidden;
+}
 
+    /* Soft shimmer across LIVE badge */
+    .liveBadge::after {
+      content: "";
+      position: absolute;
+      top: -30%;
+      left: -40%;
+      width: 60%;
+      height: 180%;
+      background: rgba(255,255,255,0.35);
+      transform: rotate(22deg);
+      animation: badgeShine 2.2s ease-in-out infinite;
+    }
+
+    @keyframes badgeShine {
+      0% { left: -60%; opacity: 0; }
+      30% { opacity: 0.45; }
+      60% { opacity: 0.15; }
+      100% { left: 140%; opacity: 0; }
+    }
+
+    /* LIVE look: Purple + Gold animated gradient, subtle glow */
+    .live {
+      background: linear-gradient(
+        270deg,
+        var(--purple),
+        #6f1f85,
+        var(--gold),
+        var(--purple)
+      );
+      background-size: 600% 600%;
+      animation: gradientMove 9s ease infinite;
+       box-shadow:
+    0 0 28px rgba(134,35,156,0.6),
+    0 10px 22px rgba(1,6,11,0.45);
+}
+    
+/* 🔆 subtle sun-ray texture for LIVE */
+.live::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      rgba(247,191,91,0.06) 0deg 10deg,
+      transparent 10deg 20deg
+    );
+  opacity: 0.35;
+  pointer-events: none;
+}
+.live a.bannerLink {
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(247,191,91,0.75);
+  box-shadow:
+    0 0 0 1px rgba(247,191,91,0.18) inset,
+    0 14px 30px rgba(1,6,11,0.25);
+}
+
+    /* OFFLINE look: Black + Gold animated gradient, different vibe */
+    .offline {
+  background: linear-gradient(
+    270deg,
+    var(--black),
+    #06121a,
+    var(--black)
+  );
+  background-size: 600% 600%;
+  animation: gradientMove 14s ease infinite;
+  box-shadow:
+    0 10px 22px rgba(1,6,11,0.65);
+}
+
+.offline a.bannerLink {
+  background: rgba(247,191,91,0.12);
+  border: 1px solid rgba(247,191,91,0.6);
+  box-shadow:
+    0 0 0 1px rgba(247,191,91,0.2) inset,
+    0 12px 26px rgba(1,6,11,0.35);
+}
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Spacer so content under iframe isn't covered */
     #spacer {
       display: none;
-      height: var(--header-height-desktop);
+      height: var(--h-desktop);
     }
 
-    /* 🔴 Pulsing LIVE dot */
-    .liveDot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #ffffff;
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.7); }
-      70%  { box-shadow: 0 0 0 8px rgba(255,255,255,0); }
-      100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
-    }
-
-    @media (max-width: 520px) {
-      .banner { height: var(--header-height-mobile); }
-      #spacer { height: var(--header-height-mobile); }
+    /* Mobile adjustments */
+    @media (max-width: 520px){
+      .banner { height: var(--h-mobile); padding: 10px 10px; }
+      #spacer { height: var(--h-mobile); }
+      a.bannerLink { border-radius: 22px; padding: 10px 14px; }
+      .titleRow { font-size: 18px; gap: 8px; }
+      .subRow { font-size: 13px; }
     }
   </style>
 </head>
 
 <body>
-
   <div id="banner" class="banner">
     <div class="bannerInner">
-      <a id="link" class="bannerLink" href="#" target="_blank" rel="noopener">
+      <a id="link" class="bannerLink" href="#" target="_top" rel="noopener">
         <span id="title" class="titleRow"></span>
-        <span id="sub" class="subRow">Join us Sundays at 9:30 AM</span>
+        <span id="sub" class="subRow"></span>
       </a>
     </div>
   </div>
@@ -104,12 +232,10 @@
 
   <script>
     (function () {
-
       const API_KEY    = "AIzaSyAUjf8QLzCafhgxSI8LN7e116-VZgcw4kg";
       const CHANNEL_ID = "UCvFyu7ybvACGGblAZxuE93g";
 
       const WATCH_LIVE_PAGE = "https://bethelamelancaster.com/watch-live";
-      const REPLAY_PAGE     = "https://bethelamelancaster.com/watch-live#replay";
 
       const banner = document.getElementById("banner");
       const spacer = document.getElementById("spacer");
@@ -117,25 +243,27 @@
       const title  = document.getElementById("title");
       const sub    = document.getElementById("sub");
 
-      function showCommon() {
+      function reveal() {
         banner.style.display = "block";
         spacer.style.display = "block";
+        // trigger the slide-down transition
+        requestAnimationFrame(() => banner.classList.add("is-visible"));
       }
 
       function showLive() {
         banner.className = "banner live";
-        title.innerHTML = '<span class="liveDot"></span>Watch Live Now';
-        sub.textContent = "Join us Sundays at 9:30 AM";
+        title.innerHTML = '<span class="liveBadge">LIVE</span> Watch Live Now';
+        sub.textContent = "Join us Sundays at 9:30 AM • Worship with us online";
         link.href = WATCH_LIVE_PAGE;
-        showCommon();
+        reveal();
       }
 
       function showOffline() {
         banner.className = "banner offline";
-        title.textContent = "▶ Watch Last Service";
-        sub.textContent = "Join us Sundays at 9:30 AM";
-        link.href = REPLAY_PAGE;
-        showCommon();
+        title.innerHTML = '✨ Watch the Latest Service Replay';
+        sub.textContent = "Join us Sundays at 9:30 AM • All are welcome";
+        link.href = WATCH_LIVE_PAGE;
+        reveal();
       }
 
       async function checkLive() {
@@ -143,28 +271,30 @@
           const url =
             "https://www.googleapis.com/youtube/v3/search" +
             "?part=snippet" +
-            "&channelId=" + CHANNEL_ID +
-            "&eventType=live&type=video&maxResults=1" +
-            "&key=" + API_KEY;
+            "&channelId=" + encodeURIComponent(CHANNEL_ID) +
+            "&eventType=live" +
+            "&type=video" +
+            "&maxResults=1" +
+            "&key=" + encodeURIComponent(API_KEY);
 
           const res = await fetch(url, { cache: "no-store" });
+          if (!res.ok) throw new Error("YT API " + res.status);
           const data = await res.json();
 
-          if (data.items && data.items.length) {
+          const item = data.items && data.items[0];
+          if (item && item.id && item.id.videoId) {
             showLive();
           } else {
             showOffline();
           }
-        } catch {
+        } catch (e) {
           showOffline();
         }
       }
 
       checkLive();
       setInterval(checkLive, 60000);
-
     })();
   </script>
-
 </body>
 </html>

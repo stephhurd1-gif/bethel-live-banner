@@ -280,31 +280,50 @@
       }
 
       async function checkLive() {
-        try {
-          const url =
-            "https://www.googleapis.com/youtube/v3/search" +
-            "?part=snippet" +
-            "&channelId=" + encodeURIComponent(CHANNEL_ID) +
-            "&eventType=live" +
-            "&type=video" +
-            "&maxResults=1" +
-            "&key=" + encodeURIComponent(API_KEY);
+  const debug = true; // <-- set back to false after
 
-          const res = await fetch(url, { cache: "no-store" });
-          if (!res.ok) throw new Error("YT API " + res.status);
-          const data = await res.json();
+  try {
+    const url =
+      "https://www.googleapis.com/youtube/v3/search" +
+      "?part=snippet" +
+      "&channelId=" + encodeURIComponent(CHANNEL_ID) +
+      "&eventType=live" +
+      "&type=video" +
+      "&maxResults=1" +
+      "&key=" + encodeURIComponent(API_KEY);
 
-          const item = data.items && data.items[0];
-          if (item && item.id && item.id.videoId) {
-            showLive();
-          } else {
-            showOffline();
-          }
-        } catch (e) {
-          showOffline();
-        }
+    const res = await fetch(url, { cache: "no-store" });
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      throw new Error(`YT API ${res.status} ${res.statusText} ${body.slice(0,120)}`);
+    }
+
+    const data = await res.json();
+    const item = data.items && data.items[0];
+
+    if (item && item.id && item.id.videoId) {
+      showLive();
+    } else {
+      // Helpful debug: show that API succeeded but returned no live items
+      if (debug) {
+        banner.className = "banner offline";
+        title.innerHTML = "ℹ️ No LIVE returned";
+        sub.textContent = "API ok, but items[] is empty. (Often Unlisted/Private stream.)";
+        link.href = WATCH_LIVE_PAGE;
+        reveal();
+      } else {
+        showOffline();
       }
-
+    }
+  } catch (e) {
+    banner.className = "banner offline";
+    title.innerHTML = "⚠️ Live check failed";
+    sub.textContent = (e && e.message) ? e.message : "Unknown error";
+    link.href = WATCH_LIVE_PAGE;
+    reveal();
+  }
+}
       checkLive();
       setInterval(checkLive, 60000);
     })();

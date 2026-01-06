@@ -7,16 +7,16 @@
 
   <style>
     :root{
-      /* Height (match your GoDaddy iframe height) */
+      /* Height (match your GoDaddy iframe section height) */
       --h-desktop: 84px;
       --h-mobile: 96px;
 
-  /* OFFICIAL BETHEL AME COLORS */
-  --black: #01060b;
-  --gold: #f7bf5b;
-  --purple: #86239c;
-  --green: #429e40;
-  --white: #fffefe;
+      /* OFFICIAL BETHEL AME COLORS */
+      --black: #01060b;
+      --gold:  #f7bf5b;
+      --purple:#86239c;
+      --green: #429e40;
+      --white: #fffefe;
     }
 
     html, body {
@@ -39,6 +39,10 @@
       z-index: 9999;
       color: var(--white);
 
+      /* Needed for the LIVE “rays” overlay */
+      position: fixed;
+      overflow: hidden;
+
       /* Gentle slide-down on show */
       transform: translateY(-16px);
       opacity: 0;
@@ -54,25 +58,15 @@
     }
 
     .bannerInner {
-      position: relative;
-      z-index: 1;
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
+      position: relative;
+      z-index: 2; /* keep text above backgrounds */
     }
-    
-/* Ensure LIVE rays stay behind text */
-    .bannerInner { 
-      position: relative; 
-      z-index: 1; 
-    }
-    
-    .live::before { 
-      z-index: 0; 
-    }
-    
+
     a.bannerLink {
       color: var(--white);
       text-decoration: none;
@@ -87,6 +81,7 @@
       border-radius: 999px;
       padding: 10px 18px;
       box-sizing: border-box;
+      cursor: pointer;
     }
 
     /* Title / subtext */
@@ -109,23 +104,19 @@
     }
 
     /* LIVE badge */
-   .liveBadge {
-  background: linear-gradient(
-    180deg,
-    #fff1c9,
-    var(--gold)
-  );
-  color: #2b1b05;
-  font-size: 12px;
-  font-weight: 900;
-  padding: 6px 12px;
-  border-radius: 999px;
-  letter-spacing: 0.9px;
-  box-shadow:
-    0 6px 16px rgba(1,6,11,0.35);
-  position: relative;
-  overflow: hidden;
-}
+    .liveBadge {
+      background: linear-gradient(180deg, #fff1c9, var(--gold));
+      color: #2b1b05;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 6px 12px;
+      border-radius: 999px;
+      letter-spacing: 0.9px;
+      box-shadow: 0 6px 16px rgba(1,6,11,0.35);
+      position: relative;
+      overflow: hidden;
+      white-space: nowrap;
+    }
 
     /* Soft shimmer across LIVE badge */
     .liveBadge::after {
@@ -148,7 +139,7 @@
     }
 
     /* LIVE look: Purple + Gold animated gradient, subtle glow */
-    .live {
+    .banner.live {
       background: linear-gradient(
         270deg,
         var(--purple),
@@ -158,59 +149,59 @@
       );
       background-size: 600% 600%;
       animation: gradientMove 9s ease infinite;
-       box-shadow:
-    0 0 28px rgba(134,35,156,0.6),
-    0 10px 22px rgba(1,6,11,0.45);
-}
-    
-/* 🔆 subtle sun-ray texture for LIVE */
-.live::before {
-  z-index: 0;
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    repeating-conic-gradient(
-      from 0deg,
-      rgba(247,191,91,0.06) 0deg 10deg,
-      transparent 10deg 20deg
-    );
-  opacity: 0.35;
-  pointer-events: none;
-}
-.live a.bannerLink {
-  background: rgba(255,255,255,0.10);
-  border: 1px solid rgba(247,191,91,0.75);
-  box-shadow:
-    0 0 0 1px rgba(247,191,91,0.18) inset,
-    0 14px 30px rgba(1,6,11,0.25);
-}
+      box-shadow:
+        0 0 28px rgba(134,35,156,0.60),
+        0 10px 22px rgba(1,6,11,0.45);
+    }
 
-    /* OFFLINE look: Black + Gold animated gradient, different vibe */
-    .offline {
-  background: linear-gradient(
-    270deg,
-    var(--black),
-    #06121a,
-    var(--black)
-  );
-  background-size: 600% 600%;
-  animation: gradientMove 14s ease infinite;
-  box-shadow:
-    0 10px 22px rgba(1,6,11,0.65);
-}
+    /* 🔆 subtle sun-ray texture for LIVE (sits behind text) */
+    .banner.live::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-conic-gradient(
+          from 0deg,
+          rgba(247,191,91,0.08) 0deg 10deg,
+          rgba(1,6,11,0)        10deg 20deg
+        );
+      opacity: 0.55;
+      pointer-events: none;
+      z-index: 1;
+    }
 
-.offline a.bannerLink {
-  background: rgba(247,191,91,0.12);
-  border: 1px solid rgba(247,191,91,0.6);
-  box-shadow:
-    0 0 0 1px rgba(247,191,91,0.2) inset,
-    0 12px 26px rgba(1,6,11,0.35);
-}
+    .banner.live a.bannerLink {
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(247,191,91,0.80);
+      box-shadow:
+        0 0 0 1px rgba(247,191,91,0.18) inset,
+        0 14px 30px rgba(1,6,11,0.25);
+    }
+
+    /* OFFLINE look: Black + Gold (different vibe) */
+    .banner.offline {
+      background: linear-gradient(
+        270deg,
+        var(--black),
+        #06121a,
+        var(--black)
+      );
+      background-size: 600% 600%;
+      animation: gradientMove 14s ease infinite;
+      box-shadow: 0 10px 22px rgba(1,6,11,0.65);
+    }
+
+    .banner.offline a.bannerLink {
+      background: rgba(247,191,91,0.12);
+      border: 1px solid rgba(247,191,91,0.60);
+      box-shadow:
+        0 0 0 1px rgba(247,191,91,0.20) inset,
+        0 12px 26px rgba(1,6,11,0.35);
+    }
 
     @keyframes gradientMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
 
@@ -245,87 +236,138 @@
 
   <script>
     (function () {
+      // ====== CONFIG ======
       const API_KEY    = "AIzaSyAUjf8QLzCafhgxSI8LN7e116-VZgcw4kg";
       const CHANNEL_ID = "UCvFyu7ybvACGGblAZxuE93g";
 
       const WATCH_LIVE_PAGE = "https://bethelamelancaster.com/watch-live";
 
+      // Polling (quota-safe)
+      const POLL_FAST_MS = 60 * 1000;       // 1 min during service window
+      const POLL_SLOW_MS = 10 * 60 * 1000;  // 10 min otherwise
+
+      // Service window (local time of the viewer device)
+      // Sunday 8am–1pm is a safe window; adjust if you want.
+      function isServiceWindow() {
+        const now = new Date();
+        const day = now.getDay();   // 0 = Sunday
+        const hr  = now.getHours(); // 0-23
+        return day === 0 && hr >= 8 && hr <= 13;
+      }
+
+      // ====== ELEMENTS ======
       const banner = document.getElementById("banner");
       const spacer = document.getElementById("spacer");
       const link   = document.getElementById("link");
       const title  = document.getElementById("title");
       const sub    = document.getElementById("sub");
 
+      // ====== OVERRIDE LOGIC ======
+      // URL overrides:
+      //   ?forceLive=1      -> force LIVE
+      //   ?forceLive=0      -> clear override (back to auto)
+      //   ?forceOffline=1   -> force OFFLINE
+      //
+      // Stored in localStorage so you can flip it once and it sticks.
+      const params = new URLSearchParams(window.location.search);
+
+      if (params.get("forceLive") === "1") {
+        localStorage.setItem("bethelForceState", "live");
+      } else if (params.get("forceOffline") === "1") {
+        localStorage.setItem("bethelForceState", "offline");
+      } else if (params.get("forceLive") === "0" || params.get("forceOffline") === "0") {
+        localStorage.removeItem("bethelForceState");
+      }
+
+      function getForcedState() {
+        return localStorage.getItem("bethelForceState"); // "live" | "offline" | null
+      }
+
+      // ====== UI HELPERS ======
       function reveal() {
         banner.style.display = "block";
         spacer.style.display = "block";
-        // trigger the slide-down transition
         requestAnimationFrame(() => banner.classList.add("is-visible"));
       }
 
-      function showLive() {
-        banner.className = "banner live";
-        title.innerHTML = '<span class="liveBadge">LIVE</span> Watch Live Now';
-        sub.textContent = "Join us Sundays at 9:30 AM • Worship with us online";
+      function setState(state) {
+        // Don’t clobber is-visible: use classList
+        banner.classList.remove("live", "offline");
+        banner.classList.add(state);
+
+        // Common
         link.href = WATCH_LIVE_PAGE;
+
+        if (state === "live") {
+          title.innerHTML = '<span class="liveBadge">LIVE</span> Watch Live Now';
+          sub.textContent = "Join us Sundays at 9:30 AM • Worship with us online";
+        } else {
+          title.innerHTML = "✨ Watch the Latest Service Replay";
+          sub.textContent = "Join us Sundays at 9:30 AM • All are welcome";
+        }
+
         reveal();
       }
 
-      function showOffline() {
-        banner.className = "banner offline";
-        title.innerHTML = '✨ Watch the Latest Service Replay';
-        sub.textContent = "Join us Sundays at 9:30 AM • All are welcome";
-        link.href = WATCH_LIVE_PAGE;
-        reveal();
+      // ====== YOUTUBE CHECK ======
+      async function checkLiveOnce() {
+        const forced = getForcedState();
+        if (forced === "live")  { setState("live"); return; }
+        if (forced === "offline"){ setState("offline"); return; }
+
+        // If there’s no key, just fall back to offline (production-safe)
+        if (!API_KEY || API_KEY === "PASTE_YOUR_API_KEY_HERE") {
+          setState("offline");
+          return;
+        }
+
+        try {
+          const url =
+            "https://www.googleapis.com/youtube/v3/search" +
+            "?part=snippet" +
+            "&channelId=" + encodeURIComponent(CHANNEL_ID) +
+            "&eventType=live" +
+            "&type=video" +
+            "&maxResults=1" +
+            "&key=" + encodeURIComponent(API_KEY);
+
+          const res = await fetch(url, { cache: "no-store" });
+
+          // Quota / error -> fail gracefully to offline (no scary errors)
+          if (!res.ok) {
+            setState("offline");
+            return;
+          }
+
+          const data = await res.json();
+          const item = data.items && data.items[0];
+
+          if (item && item.id && item.id.videoId) {
+            setState("live");
+          } else {
+            setState("offline");
+          }
+        } catch (e) {
+          setState("offline");
+        }
       }
 
-      async function checkLive() {
-  const debug = true; // <-- set back to false after
+      // ====== START + SMART POLLING ======
+      checkLiveOnce();
 
-  try {
-    const url =
-      "https://www.googleapis.com/youtube/v3/search" +
-      "?part=snippet" +
-      "&channelId=" + encodeURIComponent(CHANNEL_ID) +
-      "&eventType=live" +
-      "&type=video" +
-      "&maxResults=1" +
-      "&key=" + encodeURIComponent(API_KEY);
-
-    const res = await fetch(url, { cache: "no-store" });
-
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      throw new Error(`YT API ${res.status} ${res.statusText} ${body.slice(0,120)}`);
-    }
-
-    const data = await res.json();
-    const item = data.items && data.items[0];
-
-    if (item && item.id && item.id.videoId) {
-      showLive();
-    } else {
-      // Helpful debug: show that API succeeded but returned no live items
-      if (debug) {
-        banner.className = "banner offline";
-        title.innerHTML = "ℹ️ No LIVE returned";
-        sub.textContent = "API ok, but items[] is empty. (Often Unlisted/Private stream.)";
-        link.href = WATCH_LIVE_PAGE;
-        reveal();
-      } else {
-        showOffline();
+      // Adaptive polling to prevent quota burn:
+      // - During service window: every 1 minute
+      // - Otherwise: every 10 minutes
+      let pollTimer = null;
+      function startPolling() {
+        if (pollTimer) clearInterval(pollTimer);
+        const interval = isServiceWindow() ? POLL_FAST_MS : POLL_SLOW_MS;
+        pollTimer = setInterval(checkLiveOnce, interval);
       }
-    }
-  } catch (e) {
-    banner.className = "banner offline";
-    title.innerHTML = "⚠️ Live check failed";
-    sub.textContent = (e && e.message) ? e.message : "Unknown error";
-    link.href = WATCH_LIVE_PAGE;
-    reveal();
-  }
-}
-      checkLive();
-      setInterval(checkLive, 5 * 60 * 1000); // every 5 minutes;
+      startPolling();
+
+      // Re-evaluate polling speed every 15 minutes
+      setInterval(startPolling, 15 * 60 * 1000);
     })();
   </script>
 </body>

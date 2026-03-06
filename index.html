@@ -316,10 +316,10 @@
         if (forced === "offline"){ setState("offline"); return; }
 
         // If there’s no key, just fall back to offline (production-safe)
-        if (!API_KEY || API_KEY === "AIzaSyAUjf8QLzCafhgxSI8LN7e116-VZgcw4kg") {
+        if (!API_KEY) {
           setState("offline");
-          return;
-        }
+         return;
+         }
 
         try {
           const url =

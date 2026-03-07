@@ -239,11 +239,13 @@
       // ====== CONFIG ======
       const API_KEY    = "AIzaSyAUjf8QLzCafhgxSI8LN7e116-VZgcw4kg";
       const CHANNEL_ID = "UCvFyu7ybvACGGblAZxuE93g";
-
+      const SERVICE_DAY = 0;        // Sunday
+      const SERVICE_HOUR = 9;       // 9 AM
+      const SERVICE_MINUTE = 30;    // 9:30 AM
       const WATCH_LIVE_PAGE = "https://bethelamelancaster.com/watch-live";
 
       // Polling (quota-safe)
-      const POLL_FAST_MS = 60 * 1000;       // 1 min during service window
+      const POLL_FAST_MS = 15000;       // 1 min during service window
       const POLL_SLOW_MS = 10 * 60 * 1000;  // 10 min otherwise
 
       // Service window (local time of the viewer device)
@@ -255,6 +257,24 @@
         return day === 0 && hr >= 8 && hr <= 13;
       }
 
+      function getServiceStatus() {
+      const now = new Date();
+
+      const service = new Date();
+      service.setDate(now.getDate());
+      service.setHours(SERVICE_HOUR);
+      service.setMinutes(SERVICE_MINUTE);
+      service.setSeconds(0);
+
+      const diff = service - now;
+
+      if (now.getDay() !== SERVICE_DAY) return "normal";
+
+      if (diff > 10 * 60 * 1000) return "before";
+      if (diff > 0) return "startingSoon";
+
+      return "during";
+    }
       // ====== ELEMENTS ======
       const banner = document.getElementById("banner");
       const spacer = document.getElementById("spacer");
@@ -298,60 +318,76 @@
         // Common
         link.href = WATCH_LIVE_PAGE;
 
+        const status = getServiceStatus();
+
         if (state === "live") {
+
           title.innerHTML = '<span class="liveBadge">LIVE</span> Watch Live Now';
           sub.textContent = "Join us Sundays at 9:30 AM • Worship with us online";
+
         } else {
-          title.innerHTML = "✨ Watch the Latest Service Replay";
-          sub.textContent = "Join us Sundays at 9:30 AM • All Are Welcome";
+
+          if (status === "startingSoon") {
+
+            title.innerHTML = "⏳ Service Starting Soon";
+            sub.textContent = "Live worship begins at 9:30 AM";
+
+        } else if (status === "before") {
+
+            title.innerHTML = "⛪ Sunday Worship at 9:30 AM";
+            sub.textContent = "Join us live or watch the replay anytime";
+
+        } else {
+
+            title.innerHTML = "✨ Watch the Latest Service Replay";
+            sub.textContent = "Join us Sundays at 9:30 AM • All Are Welcome";
+
+          }
+
         }
 
         reveal();
       }
-
       // ====== YOUTUBE CHECK ======
-      async function checkLiveOnce() {
-        const forced = getForcedState();
-        if (forced === "live")  { setState("live"); return; }
-        if (forced === "offline"){ setState("offline"); return; }
+     async function checkLiveOnce() {
 
-        // If there’s no key, just fall back to offline (production-safe)
-        if (!API_KEY) {
-          setState("offline");
-         return;
-         }
+      const forced = getForcedState();
+      if (forced === "live")  { setState("live"); return; }
+      if (forced === "offline"){ setState("offline"); return; }
 
-        try {
-          const url =
-            "https://www.googleapis.com/youtube/v3/search" +
-            "?part=snippet" +
-            "&channelId=" + encodeURIComponent(CHANNEL_ID) +
-            "&eventType=live" +
-            "&type=video" +
-            "&maxResults=1" +
-            "&key=" + encodeURIComponent(API_KEY);
-
-          const res = await fetch(url, { cache: "no-store" });
-
-          // Quota / error -> fail gracefully to offline (no scary errors)
-          if (!res.ok) {
-            setState("offline");
-            return;
-          }
-
-          const data = await res.json();
-          const item = data.items && data.items[0];
-
-          if (item && item.id && item.id.videoId) {
-            setState("live");
-          } else {
-            setState("offline");
-          }
-        } catch (e) {
-          setState("offline");
-        }
+      if (!API_KEY) {
+        setState("offline");
+        return;
       }
 
+  try {
+
+    const url =
+      "https://www.googleapis.com/youtube/v3/search" +
+      "?part=snippet" +
+      "&channelId=" + encodeURIComponent(CHANNEL_ID) +
+      "&eventType=live" +
+      "&type=video" +
+      "&maxResults=1" +
+      "&key=" + encodeURIComponent(API_KEY);
+
+    const res = await fetch(url, { cache: "no-store" });
+
+    if (!res.ok) return;
+
+    const data = await res.json();
+    const item = data.items && data.items[0];
+
+    if (item && item.id && item.id.videoId) {
+      setState("live");
+    } else {
+      setState("offline");
+    }
+
+  } catch (e) {
+    console.log("Live check failed");
+  }
+}
       // ====== START + SMART POLLING ======
       checkLiveOnce();
 

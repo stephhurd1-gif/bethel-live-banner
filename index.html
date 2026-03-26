@@ -7,11 +7,9 @@
 
   <style>
     :root{
-      /* Height (match your GoDaddy iframe section height) */
       --h-desktop: 84px;
       --h-mobile: 96px;
 
-      /* OFFICIAL BETHEL AME COLORS */
       --black: #01060b;
       --gold:  #f7bf5b;
       --purple:#86239c;
@@ -22,33 +20,34 @@
     html, body {
       margin: 0;
       padding: 0;
+      width: 100%;
+      max-width: 100%;
       background: transparent;
       overflow: hidden;
       font-family: Arial, sans-serif;
     }
 
-    /* Banner shell */
-    .banner {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: var(--h-desktop);
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
+    }
+
+    .banner {
+      position: relative;
+      top: 0;
+      left: 0;
+      width: 100%;
+      max-width: 100%;
+      height: var(--h-desktop);
       padding: 10px 14px;
       display: none;
-      z-index: 9999;
+      z-index: 1;
       color: var(--white);
-
-      /* Needed for the LIVE “rays” overlay */
-      position: fixed;
       overflow: hidden;
-
-      /* Gentle slide-down on show */
       transform: translateY(-16px);
       opacity: 0;
       transition: transform 520ms ease, opacity 520ms ease;
-
-      /* Depth */
       box-shadow: 0 10px 22px rgba(0,0,0,0.35);
     }
 
@@ -64,7 +63,8 @@
       justify-content: center;
       text-align: center;
       position: relative;
-      z-index: 2; /* keep text above backgrounds */
+      z-index: 2;
+      max-width: 100%;
     }
 
     a.bannerLink {
@@ -80,11 +80,10 @@
       line-height: 1.12;
       border-radius: 999px;
       padding: 10px 18px;
-      box-sizing: border-box;
       cursor: pointer;
+      overflow: hidden;
     }
 
-    /* Title / subtext */
     .titleRow {
       display: flex;
       align-items: center;
@@ -94,6 +93,9 @@
       letter-spacing: 0.2px;
       font-size: 22px;
       text-shadow: 0 2px 10px rgba(0,0,0,0.25);
+      width: 100%;
+      max-width: 100%;
+      flex-wrap: wrap;
     }
 
     .subRow {
@@ -103,7 +105,6 @@
       text-shadow: 0 2px 10px rgba(0,0,0,0.20);
     }
 
-    /* LIVE badge */
     .liveBadge {
       background: linear-gradient(180deg, #fff1c9, var(--gold));
       color: #2b1b05;
@@ -118,7 +119,6 @@
       white-space: nowrap;
     }
 
-    /* Soft shimmer across LIVE badge */
     .liveBadge::after {
       content: "";
       position: absolute;
@@ -138,7 +138,6 @@
       100% { left: 140%; opacity: 0; }
     }
 
-    /* LIVE look: Purple + Gold animated gradient, subtle glow */
     .banner.live {
       background: linear-gradient(
         270deg,
@@ -154,7 +153,6 @@
         0 10px 22px rgba(1,6,11,0.45);
     }
 
-    /* 🔆 subtle sun-ray texture for LIVE (sits behind text) */
     .banner.live::before {
       content: "";
       position: absolute;
@@ -163,7 +161,7 @@
         repeating-conic-gradient(
           from 0deg,
           rgba(247,191,91,0.08) 0deg 10deg,
-          rgba(1,6,11,0)        10deg 20deg
+          rgba(1,6,11,0) 10deg 20deg
         );
       opacity: 0.55;
       pointer-events: none;
@@ -178,7 +176,6 @@
         0 14px 30px rgba(1,6,11,0.25);
     }
 
-    /* OFFLINE look: Black + Gold (different vibe) */
     .banner.offline {
       background: linear-gradient(
         270deg,
@@ -205,16 +202,8 @@
       100% { background-position: 0% 50%; }
     }
 
-    /* Spacer so content under iframe isn't covered */
-    #spacer {
-      display: none;
-      height: var(--h-desktop);
-    }
-
-    /* Mobile adjustments */
     @media (max-width: 520px){
       .banner { height: var(--h-mobile); padding: 10px 10px; }
-      #spacer { height: var(--h-mobile); }
       a.bannerLink { border-radius: 22px; padding: 10px 14px; }
       .titleRow { font-size: 18px; gap: 8px; }
       .subRow { font-size: 13px; }
@@ -232,63 +221,48 @@
     </div>
   </div>
 
-  <div id="spacer"></div>
-
   <script>
     (function () {
-      // ====== CONFIG ======
-      const API_KEY    = "AIzaSyAUjf8QLzCafhgxSI8LN7e116-VZgcw4kg";
+      const API_KEY = "AIzaSyAUjf8QLzCafhgxSI8LN7e116-VZgcw4kg";
       const CHANNEL_ID = "UCvFyu7ybvACGGblAZxuE93g";
-      const SERVICE_DAY = 0;        // Sunday
-      const SERVICE_HOUR = 9;       // 9 AM
-      const SERVICE_MINUTE = 30;    // 9:30 AM
+      const SERVICE_DAY = 0;
+      const SERVICE_HOUR = 9;
+      const SERVICE_MINUTE = 30;
       const WATCH_LIVE_PAGE = "https://bethelamelancaster.com/watch-live";
 
-      // Polling (quota-safe)
-      const POLL_FAST_MS = 15000;       // 1 min during service window
-      const POLL_SLOW_MS = 10 * 60 * 1000;  // 10 min otherwise
+      const POLL_FAST_MS = 60000;
+      const POLL_SLOW_MS = 10 * 60 * 1000;
 
-      // Service window (local time of the viewer device)
-      // Sunday 8am–1pm is a safe window; adjust if you want.
       function isServiceWindow() {
         const now = new Date();
-        const day = now.getDay();   // 0 = Sunday
-        const hr  = now.getHours(); // 0-23
+        const day = now.getDay();
+        const hr = now.getHours();
         return day === 0 && hr >= 8 && hr <= 13;
       }
 
       function getServiceStatus() {
-      const now = new Date();
+        const now = new Date();
 
-      const service = new Date();
-      service.setDate(now.getDate());
-      service.setHours(SERVICE_HOUR);
-      service.setMinutes(SERVICE_MINUTE);
-      service.setSeconds(0);
+        const service = new Date();
+        service.setDate(now.getDate());
+        service.setHours(SERVICE_HOUR);
+        service.setMinutes(SERVICE_MINUTE);
+        service.setSeconds(0);
+        service.setMilliseconds(0);
 
-      const diff = service - now;
+        const diff = service - now;
 
-      if (now.getDay() !== SERVICE_DAY) return "normal";
+        if (now.getDay() !== SERVICE_DAY) return "normal";
+        if (diff > 10 * 60 * 1000) return "before";
+        if (diff > 0) return "startingSoon";
+        return "during";
+      }
 
-      if (diff > 10 * 60 * 1000) return "before";
-      if (diff > 0) return "startingSoon";
-
-      return "during";
-    }
-      // ====== ELEMENTS ======
       const banner = document.getElementById("banner");
-      const spacer = document.getElementById("spacer");
-      const link   = document.getElementById("link");
-      const title  = document.getElementById("title");
-      const sub    = document.getElementById("sub");
+      const link = document.getElementById("link");
+      const title = document.getElementById("title");
+      const sub = document.getElementById("sub");
 
-      // ====== OVERRIDE LOGIC ======
-      // URL overrides:
-      //   ?forceLive=1      -> force LIVE
-      //   ?forceLive=0      -> clear override (back to auto)
-      //   ?forceOffline=1   -> force OFFLINE
-      //
-      // Stored in localStorage so you can flip it once and it sticks.
       const params = new URLSearchParams(window.location.search);
 
       if (params.get("forceLive") === "1") {
@@ -300,109 +274,98 @@
       }
 
       function getForcedState() {
-        return localStorage.getItem("bethelForceState"); // "live" | "offline" | null
+        return localStorage.getItem("bethelForceState");
       }
 
-      // ====== UI HELPERS ======
       function reveal() {
         banner.style.display = "block";
-        spacer.style.display = "block";
         requestAnimationFrame(() => banner.classList.add("is-visible"));
       }
 
       function setState(state) {
-        // Don’t clobber is-visible: use classList
         banner.classList.remove("live", "offline");
         banner.classList.add(state);
 
-        // Common
         link.href = WATCH_LIVE_PAGE;
 
         const status = getServiceStatus();
 
         if (state === "live") {
-
           title.innerHTML = '<span class="liveBadge">LIVE</span> Watch Live Now';
           sub.textContent = "Join us Sundays at 9:30 AM • Worship with us online";
-
         } else {
-
           if (status === "startingSoon") {
-
-            title.innerHTML = "⏳ Service Starting Soon";
+            title.textContent = "⏳ Service Starting Soon";
             sub.textContent = "Live worship begins at 9:30 AM";
-
-        } else if (status === "before") {
-
-            title.innerHTML = "⛪ Sunday Worship at 9:30 AM";
+          } else if (status === "before") {
+            title.textContent = "⛪ Sunday Worship at 9:30 AM";
             sub.textContent = "Join us live or watch the replay anytime";
-
-        } else {
-
-            title.innerHTML = "✨ Watch the Latest Service Replay";
+          } else {
+            title.textContent = "✨ Watch the Latest Service Replay";
             sub.textContent = "Join us Sundays at 9:30 AM • All Are Welcome";
-
           }
-
         }
 
         reveal();
       }
-      // ====== YOUTUBE CHECK ======
-     async function checkLiveOnce() {
 
-      const forced = getForcedState();
-      if (forced === "live")  { setState("live"); return; }
-      if (forced === "offline"){ setState("offline"); return; }
+      async function checkLiveOnce() {
+        const forced = getForcedState();
+        if (forced === "live") {
+          setState("live");
+          return;
+        }
+        if (forced === "offline") {
+          setState("offline");
+          return;
+        }
 
-      if (!API_KEY) {
-        setState("offline");
-        return;
+        if (!API_KEY) {
+          setState("offline");
+          return;
+        }
+
+        try {
+          const url =
+            "https://www.googleapis.com/youtube/v3/search" +
+            "?part=snippet" +
+            "&channelId=" + encodeURIComponent(CHANNEL_ID) +
+            "&eventType=live" +
+            "&type=video" +
+            "&maxResults=1" +
+            "&key=" + encodeURIComponent(API_KEY);
+
+          const res = await fetch(url, { cache: "no-store" });
+
+          if (!res.ok) {
+            setState("offline");
+            return;
+          }
+
+          const data = await res.json();
+          const item = data.items && data.items[0];
+
+          if (item && item.id && item.id.videoId) {
+            setState("live");
+          } else {
+            setState("offline");
+          }
+        } catch (e) {
+          console.log("Live check failed");
+          setState("offline");
+        }
       }
 
-  try {
-
-    const url =
-      "https://www.googleapis.com/youtube/v3/search" +
-      "?part=snippet" +
-      "&channelId=" + encodeURIComponent(CHANNEL_ID) +
-      "&eventType=live" +
-      "&type=video" +
-      "&maxResults=1" +
-      "&key=" + encodeURIComponent(API_KEY);
-
-    const res = await fetch(url, { cache: "no-store" });
-
-    if (!res.ok) return;
-
-    const data = await res.json();
-    const item = data.items && data.items[0];
-
-    if (item && item.id && item.id.videoId) {
-      setState("live");
-    } else {
-      setState("offline");
-    }
-
-  } catch (e) {
-    console.log("Live check failed");
-  }
-}
-      // ====== START + SMART POLLING ======
       checkLiveOnce();
 
-      // Adaptive polling to prevent quota burn:
-      // - During service window: every 1 minute
-      // - Otherwise: every 10 minutes
       let pollTimer = null;
       function startPolling() {
         if (pollTimer) clearInterval(pollTimer);
         const interval = isServiceWindow() ? POLL_FAST_MS : POLL_SLOW_MS;
         pollTimer = setInterval(checkLiveOnce, interval);
       }
-      startPolling();
 
-      // Re-evaluate polling speed every 15 minutes
+      startPolling();
       setInterval(startPolling, 15 * 60 * 1000);
     })();
   </script>
